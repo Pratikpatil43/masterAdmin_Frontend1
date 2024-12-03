@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { addHod } from "../../../services/hodService";  // Import the addHod function from the service
+import { addHod } from "../../../services/hodService";  // Import the addHod service
 import { BsEye, BsEyeSlash } from "react-icons/bs";
 
 const AddHodForm = () => {
@@ -17,10 +17,7 @@ const AddHodForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const togglePasswordVisibility = () => {
@@ -31,16 +28,16 @@ const AddHodForm = () => {
     e.preventDefault();
 
     try {
-      const data = await addHod(formData);  // Call the service to add HOD
-      setMessage("HOD added successfully!");
+      const data = await addHod(formData);
+      setMessage(data?.message || "HOD added successfully!");
       setError(null);
       setFormData({
         name: "",
-        role: "",
+        role: "hod",
         username: "",
         password: "",
         branch: "",
-      });  // Reset form
+      });
     } catch (err) {
       setError(err.message || "An error occurred while adding the HOD.");
       setMessage(null);
@@ -52,7 +49,7 @@ const AddHodForm = () => {
       <div className="row justify-content-center">
         <div className="col-12 col-sm-8 col-md-6 col-lg-5">
           <div className="card shadow-sm border-light">
-            <div className="card-header text-center" style={{ backgroundColor: '#f8f9fa' }}>
+            <div className="card-header text-center bg-light">
               <h4 className="text-muted">Add New HOD</h4>
             </div>
             <div className="card-body">
@@ -70,21 +67,6 @@ const AddHodForm = () => {
                     required
                   />
                 </div>
-
-                <div className="mb-3">
-                  <label htmlFor="role" className="form-label">Role</label>
-                  <select
-                    id="role"
-                    name="role"
-                    className="form-control"
-                    value={formData.role}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="HOD">HOD</option>
-                  </select>
-                </div>
-
                 <div className="mb-3">
                   <label htmlFor="username" className="form-label">Username</label>
                   <input
@@ -98,11 +80,10 @@ const AddHodForm = () => {
                     required
                   />
                 </div>
-
                 <div className="mb-3 position-relative">
                   <label htmlFor="password" className="form-label">Password</label>
                   <input
-                    type={passwordVisible ? 'text' : 'password'}
+                    type={passwordVisible ? "text" : "password"}
                     id="password"
                     name="password"
                     className="form-control"
@@ -113,18 +94,17 @@ const AddHodForm = () => {
                   />
                   <span
                     onClick={togglePasswordVisibility}
+                    className="position-absolute"
                     style={{
-                      position: 'absolute',
-                      top: '50%',
-                      right: '10px',
-                      transform: 'translateY(-10%)',
-                      cursor: 'pointer',
+                      top: "50%",
+                      right: "10px",
+                      transform: "translateY(-50%)",
+                      cursor: "pointer",
                     }}
                   >
                     {passwordVisible ? <BsEyeSlash /> : <BsEye />}
                   </span>
                 </div>
-
                 <div className="mb-3">
                   <label htmlFor="branch" className="form-label">Branch</label>
                   <input
@@ -138,13 +118,10 @@ const AddHodForm = () => {
                     required
                   />
                 </div>
-
                 <div className="d-grid gap-2">
                   <button type="submit" className="btn btn-primary">Add HOD</button>
                 </div>
               </form>
-
-              {/* Display success or error messages */}
               {message && (
                 <div className="alert alert-success mt-3" role="alert">
                   {message}
