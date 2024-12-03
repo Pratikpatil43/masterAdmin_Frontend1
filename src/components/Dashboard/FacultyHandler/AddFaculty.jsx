@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { BsEye, BsEyeSlash } from "react-icons/bs";
+import { Spinner } from "react-bootstrap"; // Import Spinner component
 
 const AddFaculty = () => {
   const [formData, setFormData] = useState({
@@ -14,6 +15,7 @@ const AddFaculty = () => {
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [loading, setLoading] = useState(false); // State to track loading status
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,13 +31,14 @@ const AddFaculty = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+    setLoading(true); // Set loading to true when submission starts
+
     try {
       const token = sessionStorage.getItem("token");
       if (!token) {
         throw new Error("No authentication token found.");
       }
-  
+
       // Send data to backend API with the headers and the form data in the body
       const response = await axios.post(
         "http://localhost:5000/api/masterAdmin/faculty/add", // Correct route
@@ -46,16 +49,18 @@ const AddFaculty = () => {
           },
         }
       );
-  
+
       setMessage(response.data.message);  // Success message
       setError(null);  // Clear previous error messages
       setFormData({ name: "", facultyUsername: "", password: "", branch: "", subject: "" });  // Reset form
     } catch (error) {
       setError(error.response?.data?.message || "Failed to add faculty");
       setMessage(null);  // Clear success message
+    } finally {
+      setLoading(false); // Set loading to false when submission finishes
     }
   };
-  
+
   return (
     <div className="container mt-5">
       <div className="row justify-content-center">
@@ -108,12 +113,12 @@ const AddFaculty = () => {
                   />
                   <span
                     onClick={togglePasswordVisibility}
+                    className="position-absolute"
                     style={{
-                      position: 'absolute',
-                      top: '50%',
-                      right: '10px',
-                      transform: 'translateY(-10%)',
-                      cursor: 'pointer',
+                      top: "65%",
+                      right: "10px",
+                      transform: "translateY(-50%)",
+                      cursor: "pointer",
                     }}
                   >
                     {passwordVisible ? <BsEyeSlash /> : <BsEye />}
@@ -149,7 +154,16 @@ const AddFaculty = () => {
                 </div>
 
                 <div className="d-grid gap-2">
-                  <button type="submit" className="btn btn-primary">Add Faculty</button>
+                  <button type="submit" className="btn btn-primary" disabled={loading}>
+                    {loading ? (
+                      <>
+                        <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />
+                        Adding...
+                      </>
+                    ) : (
+                      "Add Faculty"
+                    )}
+                  </button>
                 </div>
               </form>
 

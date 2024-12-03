@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { BsPencil, BsTrash } from "react-icons/bs";
 import axios from "axios";
-import { Container, Row, Col, Card, Button, Modal, Form } from "react-bootstrap";
+import { Container, Row, Col, Card, Button, Modal, Form, Spinner } from "react-bootstrap";
 
 // Manually decode JWT
 const decodeJWT = (token) => {
@@ -24,9 +24,14 @@ const FetchHod = () => {
     password: "",
     branch: "",
   });
+  const [loading, setLoading] = useState(false); // Loading state for fetching data
+  const [showDeleteModal, setShowDeleteModal] = useState(false); // State to show delete confirmation modal
+  const [deleting, setDeleting] = useState(false); // Loading state for delete operation
+  const [hodToDelete, setHodToDelete] = useState(null); // HOD to be deleted
 
   useEffect(() => {
     const fetchHods = async () => {
+      setLoading(true); // Start loading data
       try {
         const token = sessionStorage.getItem("token");
         if (!token) {
@@ -62,13 +67,17 @@ const FetchHod = () => {
         } else {
           setError("Failed to fetch HODs: " + err.message);
         }
+      } finally {
+        setLoading(false); // Stop loading once data is fetched
       }
     };
 
     fetchHods();
   }, []); // Empty dependency array to run once on component mount
 
-  const handleDelete = async (id) => {
+  const handleDelete = async () => {
+    if (!hodToDelete) return;
+    setDeleting(true); // Start delete loading
     try {
       const token = sessionStorage.getItem("token");
       if (!token) {
@@ -82,15 +91,18 @@ const FetchHod = () => {
       }
 
       // Delete HOD using the id and token for authentication
-      await axios.delete(`http://localhost:5000/api/masterAdmin/hod/remove/${id}`, {
+      await axios.delete(`http://localhost:5000/api/masterAdmin/hod/remove/${hodToDelete._id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      setHods((prevHods) => prevHods.filter((hod) => hod._id !== id)); // Remove deleted HOD from the list
+      setHods((prevHods) => prevHods.filter((hod) => hod._id !== hodToDelete._id)); // Remove deleted HOD from the list
+      setShowDeleteModal(false); // Close delete confirmation modal
     } catch (err) {
       setError("Failed to delete HOD: " + err.message);
+    } finally {
+      setDeleting(false); // Stop delete loading
     }
   };
 
@@ -176,6 +188,13 @@ const FetchHod = () => {
         </div>
       )}
 
+      {/* Display loader while fetching data */}
+      {loading && (
+        <div className="text-center">
+          <Spinner animation="border" variant="primary" />
+        </div>
+      )}
+
       {/* Desktop View (Table) */}
       <div className="d-none d-md-block">
         <table className="table table-bordered mt-3">
@@ -205,7 +224,7 @@ const FetchHod = () => {
                     </button>
                     <button
                       className="btn btn-danger"
-                      onClick={() => handleDelete(hod._id)} // Use '_id' for delete
+                      onClick={() => { setHodToDelete(hod); setShowDeleteModal(true); }} // Trigger delete modal
                     >
                       <BsTrash />
                     </button>
@@ -230,22 +249,23 @@ const FetchHod = () => {
                     </Card.Subtitle>
                     <Card.Text>
                       <strong>Branch:</strong> {hod.branch}
-                      <br />
-                      <strong>Role:</strong> {hod.role}
                     </Card.Text>
-                    <Button
-                      variant="warning"
-                      className="me-2"
-                      onClick={() => handleUpdate(hod)} // Trigger update
-                    >
-                      <BsPencil />
-                    </Button>
-                    <Button
-                      variant="danger"
-                      onClick={() => handleDelete(hod._id)} // Use '_id' for delete
-                    >
-                      <BsTrash />
-                    </Button>
+                    <div className="d-flex justify-content-between">
+                      <Button
+                        variant="warning"
+                        size="sm"
+                        onClick={() => handleUpdate(hod)} // Trigger update
+                      >
+                        <BsPencil />
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => { setHodToDelete(hod); setShowDeleteModal(true); }} // Trigger delete modal
+                      >
+                        <BsTrash />
+                      </Button>
+                    </div>
                   </Card.Body>
                 </Card>
               </Col>
@@ -253,7 +273,7 @@ const FetchHod = () => {
         </Row>
       </div>
 
-      {/* Modal for Updating HOD */}
+      {/* Update Modal */}
       <Modal show={showModal} onHide={handleModalClose}>
         <Modal.Header closeButton>
           <Modal.Title>Update HOD</Modal.Title>
@@ -279,11 +299,10 @@ const FetchHod = () => {
               />
             </Form.Group>
             <Form.Group controlId="formPassword">
-              <Form.Label>New Password</Form.Label>
+              <Form.Label>Password</Form.Label>
               <Form.Control
                 type="password"
                 name="password"
-                placeholder="Enter new password"
                 value={formData.password}
                 onChange={handleFormChange}
               />
@@ -297,11 +316,39 @@ const FetchHod = () => {
                 onChange={handleFormChange}
               />
             </Form.Group>
-            <Button variant="primary" onClick={handleUpdateSubmit}>
-              Update HOD
-            </Button>
           </Form>
         </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleModalClose}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handleUpdateSubmit}>
+            Update
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Delete</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Are you sure you want to delete this HOD?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleDelete} disabled={deleting}>
+            {deleting ? (
+              <>
+                <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" />{" "}
+                Deleting...
+              </>
+            ) : (
+              "Delete"
+            )}
+          </Button>
+        </Modal.Footer>
       </Modal>
     </Container>
   );

@@ -16,6 +16,7 @@ const Request = () => {
   const [requests, setRequests] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [loadingAction, setLoadingAction] = useState(null); // Track the action loading state
   const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
@@ -53,6 +54,7 @@ const Request = () => {
 
   const handleAction = async (requestId, action) => {
     try {
+      setLoadingAction(requestId); // Show spinner for this action
       const token = sessionStorage.getItem("token");
       if (!token) {
         throw new Error("No authentication token found.");
@@ -65,7 +67,7 @@ const Request = () => {
       }
   
       const response = await axios.post(
-        `http://localhost:5000/api/masterAdmin/approveRejectRequest`, // No `masterAdmin` in URL anymore
+        `http://localhost:5000/api/masterAdmin/approveRejectRequest`,
         { requestId, action },
         {
           headers: {
@@ -74,32 +76,25 @@ const Request = () => {
         }
       );
   
-      // Check the response before updating UI or showing success message
       if (response.data.success) {
-        // Update the request status locally if the backend confirms success
         setRequests((prevRequests) =>
           prevRequests.map((req) =>
             req._id === requestId ? { ...req, status: action } : req
-        
           )
-          
         );
-        
       } else {
-        // Handle failure if the server response indicates failure
-        setSuccessMessage(`Request has been ${action}ed successfully.`);
- 
+        setSuccessMessage(`Request has been ${action}ed successfully. Refresh your application.`);
       }
     } catch (err) {
       console.error('Error updating request status:', err);
-      // Set error message if something goes wrong with the request or token
       setSuccessMessage('An error occurred while updating the status.');
+    } finally {
+      setLoadingAction(null); // Hide spinner after action is complete
     }
   };
-  
 
   if (loading) {
-    return <div className="text-center mt-5">Loading...</div>;
+    return <div className="text-center mt-5">Loading requests...</div>;
   }
 
   if (error) {
@@ -147,14 +142,28 @@ const Request = () => {
                     <button
                       className="btn btn-success btn-sm"
                       onClick={() => handleAction(request._id, 'approve')}
+                      disabled={loadingAction === request._id} // Disable button while loading
                     >
-                      Approve
+                      {loadingAction === request._id ? (
+                        <div className="spinner-border spinner-border-sm" role="status">
+                          <span className="visually-hidden">Loading...</span>
+                        </div>
+                      ) : (
+                        'Approve'
+                      )}
                     </button>
                     <button
                       className="btn btn-danger btn-sm"
                       onClick={() => handleAction(request._id, 'reject')}
+                      disabled={loadingAction === request._id} // Disable button while loading
                     >
-                      Reject
+                      {loadingAction === request._id ? (
+                        <div className="spinner-border spinner-border-sm" role="status">
+                          <span className="visually-hidden">Loading...</span>
+                        </div>
+                      ) : (
+                        'Reject'
+                      )}
                     </button>
                   </div>
                 </td>

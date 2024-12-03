@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Container, Row, Col, Table, Button, Modal, Form, Alert } from "react-bootstrap";
+import { Container, Row, Col, Table, Button, Modal, Form, Alert, Spinner } from "react-bootstrap";
 import { BsPencil, BsTrash } from "react-icons/bs";
 
 // Manually decode JWT
@@ -17,16 +17,19 @@ const FetchFaculty = () => {
   const [faculty, setFaculty] = useState([]);
   const [message, setMessage] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false); // for delete confirmation
+  const [loading, setLoading] = useState(false); // loader state
   const [selectedFaculty, setSelectedFaculty] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
-    facultyUsername: '', // Make sure this matches your field
+    facultyUsername: '',
     branch: '',
     subject: ''
   });
 
   // Fetch faculties
   const fetchFaculties = async () => {
+    setLoading(true); // Start loader
     try {
       const token = sessionStorage.getItem("token");
       if (!token) {
@@ -42,14 +45,16 @@ const FetchFaculty = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      console.log(response.data.facultyMembers); // Log response to verify data
       setFaculty(response.data.facultyMembers);
     } catch (error) {
       setMessage(error.response?.data?.message || 'Failed to fetch faculty');
+    } finally {
+      setLoading(false); // Stop loader
     }
   };
 
   const handleDelete = async (id) => {
+    setLoading(true); // Start loader while deleting
     try {
       const token = sessionStorage.getItem("token");
       if (!token) {
@@ -70,17 +75,19 @@ const FetchFaculty = () => {
   
       // Remove the faculty from the state to reflect the UI changes immediately
       setFaculty(faculty.filter((facultyItem) => facultyItem.id !== id));
-  
+      setShowDeleteModal(false); // Close the confirmation modal
     } catch (error) {
       setMessage(error.response?.data?.message || 'Failed to delete faculty');
+    } finally {
+      setLoading(false); // Stop loader after deletion
     }
   };
-  
+
   const handleUpdate = (faculty) => {
     setSelectedFaculty(faculty);
     setFormData({
       name: faculty.name,
-      facultyUsername: faculty.username, // Ensure the correct field here
+      facultyUsername: faculty.username,
       branch: faculty.branch,
       subject: faculty.subject
     });
@@ -130,36 +137,45 @@ const FetchFaculty = () => {
         </Alert>
       )}
 
+      {/* Loader while data is being fetched */}
+      {loading && (
+        <div className="text-center">
+          <Spinner animation="border" variant="primary" />
+        </div>
+      )}
+
       {/* Display faculty list in a table */}
-      <Table striped bordered hover className="mt-3">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Username</th>
-            <th>Branch</th>
-            <th>Subject</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {faculty.map((faculty) => (
-            <tr key={faculty.id}>
-              <td>{faculty.name}</td>
-              <td>{faculty.username}</td>
-              <td>{faculty.branch}</td>
-              <td>{faculty.subject}</td>
-              <td>
-                <Button variant="warning" className="me-2" onClick={() => handleUpdate(faculty)}>
-                  <BsPencil /> Update
-                </Button>
-                <Button variant="danger" onClick={() => handleDelete(faculty.id)}>
-                  <BsTrash /> Delete
-                </Button>
-              </td>
+      {!loading && faculty.length > 0 && (
+        <Table striped bordered hover className="mt-3">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Username</th>
+              <th>Branch</th>
+              <th>Subject</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {faculty.map((faculty) => (
+              <tr key={faculty.id}>
+                <td>{faculty.name}</td>
+                <td>{faculty.username}</td>
+                <td>{faculty.branch}</td>
+                <td>{faculty.subject}</td>
+                <td>
+                  <Button variant="warning" className="me-2" onClick={() => handleUpdate(faculty)}>
+                    <BsPencil /> Update
+                  </Button>
+                  <Button variant="danger" onClick={() => { setSelectedFaculty(faculty); setShowDeleteModal(true); }}>
+                    <BsTrash /> Delete
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      )}
 
       {/* Modal for updating faculty */}
       {showModal && (
@@ -184,7 +200,7 @@ const FetchFaculty = () => {
                 <Form.Control
                   type="text"
                   name="facultyUsername"
-                  value={formData.facultyUsername} // Bind value to formData.facultyUsername
+                  value={formData.facultyUsername}
                   onChange={handleChange}
                   required
                 />
@@ -218,6 +234,26 @@ const FetchFaculty = () => {
                 </Button>
               </Modal.Footer>
             </Form>
+          </Modal.Body>
+        </Modal>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Delete Faculty</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>Are you sure you want to delete the faculty member: {selectedFaculty?.name}?</p>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                Cancel
+              </Button>
+              <Button variant="danger" onClick={() => handleDelete(selectedFaculty?.id)}>
+                Confirm Delete
+              </Button>
+            </Modal.Footer>
           </Modal.Body>
         </Modal>
       )}

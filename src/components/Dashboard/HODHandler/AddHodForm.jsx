@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { addHod } from "../../../services/hodService";  // Import the addHod service
+import { addHod } from "../../../services/hodService"; // Import the addHod service
 import { BsEye, BsEyeSlash } from "react-icons/bs";
+import { Spinner } from "react-bootstrap"; // Import Spinner from react-bootstrap
 
 const AddHodForm = () => {
   const [formData, setFormData] = useState({
@@ -14,6 +15,7 @@ const AddHodForm = () => {
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [loading, setLoading] = useState(false); // Loading state
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,6 +28,7 @@ const AddHodForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true); // Set loading to true when form is submitted
 
     try {
       const data = await addHod(formData);
@@ -41,6 +44,8 @@ const AddHodForm = () => {
     } catch (err) {
       setError(err.message || "An error occurred while adding the HOD.");
       setMessage(null);
+    } finally {
+      setLoading(false); // Set loading to false after the request is complete
     }
   };
 
@@ -96,7 +101,7 @@ const AddHodForm = () => {
                     onClick={togglePasswordVisibility}
                     className="position-absolute"
                     style={{
-                      top: "50%",
+                      top: "65%",
                       right: "10px",
                       transform: "translateY(-50%)",
                       cursor: "pointer",
@@ -119,7 +124,13 @@ const AddHodForm = () => {
                   />
                 </div>
                 <div className="d-grid gap-2">
-                  <button type="submit" className="btn btn-primary">Add HOD</button>
+                  <button type="submit" className="btn btn-primary" disabled={loading}>
+                    {loading ? (
+                      <Spinner animation="border" size="sm" /> // Display spinner when loading
+                    ) : (
+                      "Add HOD"
+                    )}
+                  </button>
                 </div>
               </form>
               {message && (
