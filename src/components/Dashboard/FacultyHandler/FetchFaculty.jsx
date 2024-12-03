@@ -11,7 +11,6 @@ const FetchFaculty = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-
   const decodeJWT = (token) => {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace('-', '+').replace('_', '/');
@@ -20,7 +19,7 @@ const FetchFaculty = () => {
     }).join(''));
     return JSON.parse(jsonPayload);
   };
-  
+
   // Fetch Faculties
   const fetchFaculties = async () => {
     try {
@@ -29,9 +28,7 @@ const FetchFaculty = () => {
         throw new Error("No authentication token found.");
       }
 
-      // Decode the JWT token using the custom decodeJWT function
       const decodedToken = decodeJWT(token);
-      console.log("Decoded Token:", decodedToken); // Log the decoded token
       if (!decodedToken || !decodedToken.masterAdmin) {
         throw new Error("Invalid token: masterAdminId missing.");
       }
@@ -46,68 +43,91 @@ const FetchFaculty = () => {
     }
   };
 
-  // Handle Delete
+  // Handle Deletion of Faculty
   const handleDelete = async (id) => {
-    if (!id) {
-      console.error('ID is undefined or invalid');
-      return;
-    }
-  
     try {
       const token = sessionStorage.getItem("token");
-      if (!token) throw new Error("No authentication token found.");
-  
-      console.log(`Deleting faculty with ID: ${id}`);
+      if (!token) {
+        throw new Error("No authentication token found.");
+      }
+
+      const decodedToken = decodeJWT(token);
+      if (!decodedToken || !decodedToken.masterAdmin) {
+        throw new Error("Invalid token: masterAdminId missing.");
+      }
+
       await axios.delete(`http://localhost:5000/api/masterAdmin/faculty/remove/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-  
-      // Update the UI by removing the deleted faculty
-      setHods((prevHods) => prevHods.filter((hod) => hod._id !== id));
+
+      // Remove deleted faculty from the list
+      setFaculties(faculties.filter((faculty) => faculty._id !== id));
     } catch (err) {
-      console.error('Error deleting faculty:', err);
+      setError("Failed to delete faculty: " + err.message);
     }
   };
 
+  // Handle Update (open the modal with existing data)
+  const handleUpdate = (faculty) => {
+    // Log the faculty object to ensure it has the correct _id
+    console.log("Selected Faculty:", faculty);
   
+    setCurrentFaculty(faculty);  // This sets the currentFaculty object including _id
+    setFormData({
+      name: faculty.name,
+      username: faculty.username,
+      branch: faculty.branch,
+      subject: faculty.subject,
+    });
+    setShowUpdateModal(true); // Show the modal
+  };
   
-  // Handle Update Button Click
-const handleUpdateClick = (faculty) => {
-  setCurrentFaculty(faculty); // Set the current faculty to be updated
-  setFormData({
-    name: faculty.name,
-    facultyUsername: faculty.username, // Make sure this matches backend field
-    branch: faculty.branch,
-    subject: faculty.subject,
-  });
-  
-  setShowUpdateModal(true); // Show the update modal
-};
 
-  // Handle Input Change
-  const handleInputChange = (e) => {
-    const { name,facultyUsername, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+  // Close the modal
+  const handleModalClose = () => {
+    setShowUpdateModal(false);
+    setCurrentFaculty(null);
   };
 
-  // Handle Submit Update
-  const handleUpdate = async (e) => {
-    e.preventDefault(); // Prevent the form from reloading the page
-  
+  // Handle form input changes
+  const handleFormChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // Submit updated data to the server
+  const handleUpdateSubmit = async () => {
     if (!currentFaculty || !currentFaculty._id) {
-      alert("Faculty ID is missing!");
-      return;
+      console.error("Faculty ID is missing or undefined!");
+      return; // Prevent further processing
     }
   
     try {
       const token = sessionStorage.getItem("token");
+      if (!token) {
+        throw new Error("No authentication token found.");
+      }
   
-      // Use the currentFaculty's ID, and pass updated fields from formData
-      const updatedFaculty = { ...currentFaculty, ...formData };
+      // Decode the JWT token using the custom decodeJWT function
+      const decodedToken = decodeJWT(token);
+      if (!decodedToken || !decodedToken.masterAdmin) {
+        throw new Error("Invalid token: masterAdminId missing.");
+      }
   
+      const updatedData = { ...formData };
+      // If password is empty, we don't include it in the update request
+      if (!updatedData.password) {
+        delete updatedData.password;
+      }
+  
+      console.log("Updating faculty with ID:", currentFaculty._id);  // Log the ID for debugging
+  
+      // Update Faculty using the id and token for authentication
       const response = await axios.put(
         `http://localhost:5000/api/masterAdmin/faculty/update/${currentFaculty._id}`,
-        updatedFaculty,
+        updatedData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -115,17 +135,19 @@ const handleUpdateClick = (faculty) => {
         }
       );
   
-      alert(response.data.message);
-      setShowUpdateModal(false); // Close modal after update
-      fetchFaculties(); // Refresh faculty list after update
-    } catch (error) {
-      console.error("Error updating faculty:", error);
-      alert("Failed to update faculty.");
+      // Update the Faculty list with the updated Faculty
+      setFaculties((prevFaculties) =>
+        prevFaculties.map((faculty) =>
+          faculty._id === currentFaculty._id ? { ...faculty, ...updatedData } : faculty
+        )
+      );
+      setShowUpdateModal(false); // Close the modal after the update
+      setCurrentFaculty(null);
+    } catch (err) {
+      setError("Failed to update Faculty: " + err.message);
     }
   };
-
-
-
+  
   useEffect(() => {
     fetchFaculties();
   }, []);
@@ -155,7 +177,7 @@ const handleUpdateClick = (faculty) => {
               <td>{faculty.branch}</td>
               <td>{faculty.subject}</td>
               <td>
-                <Button variant="warning" onClick={() => handleUpdateClick(faculty)} className="me-2">
+                <Button variant="warning" onClick={() => handleUpdate(faculty)} className="me-2">
                   <BsPencil />
                 </Button>
                 <Button variant="danger" onClick={() => handleDelete(faculty._id)}>
@@ -168,19 +190,19 @@ const handleUpdateClick = (faculty) => {
       </table>
 
       {/* Update Modal */}
-      <Modal show={showUpdateModal} onHide={() => setShowUpdateModal(false)} size="lg">
+      <Modal show={showUpdateModal} onHide={handleModalClose} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>Update Faculty</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form onSubmit={handleUpdate}>
+          <Form onSubmit={handleUpdateSubmit}>
             <Form.Group className="mb-3">
               <Form.Label>Name</Form.Label>
               <Form.Control
                 type="text"
                 name="name"
                 value={formData.name}
-                onChange={handleInputChange}
+                onChange={handleFormChange}
                 required
               />
             </Form.Group>
@@ -189,8 +211,8 @@ const handleUpdateClick = (faculty) => {
               <Form.Control
                 type="text"
                 name="username"
-                value={formData.facultyUsername}
-                onChange={handleInputChange}
+                value={formData.username}
+                onChange={handleFormChange}
                 required
               />
             </Form.Group>
@@ -200,7 +222,7 @@ const handleUpdateClick = (faculty) => {
                 type="text"
                 name="branch"
                 value={formData.branch}
-                onChange={handleInputChange}
+                onChange={handleFormChange}
                 required
               />
             </Form.Group>
@@ -210,12 +232,12 @@ const handleUpdateClick = (faculty) => {
                 type="text"
                 name="subject"
                 value={formData.subject}
-                onChange={handleInputChange}
+                onChange={handleFormChange}
                 required
               />
             </Form.Group>
             <Modal.Footer>
-              <Button variant="secondary" onClick={() => setShowUpdateModal(false)}>
+              <Button variant="secondary" onClick={handleModalClose}>
                 Cancel
               </Button>
               <Button variant="primary" type="submit">
