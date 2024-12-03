@@ -130,6 +130,26 @@ const Sidebar = () => {
               <ListItemText primary="Fetch Faculty" />
             </ListItem>
           </List>
+          <Divider sx={{ margin: "10px 0" }} />
+
+          {/* Section: Requests */}
+          <Typography variant="h6" sx={{ marginBottom: "5px", fontWeight: "bold", color: "#555" }}>
+            Requests Management
+          </Typography>
+          <List>
+            <ListItem
+              button
+              component={Link}
+              to="/dashboard/view-requests" // Link to the page for viewing requests
+              onClick={handleLinkClick}
+            >
+              <ListItemIcon>
+                <ListIcon />
+              </ListItemIcon>
+              <ListItemText primary="View Requests" />
+            </ListItem>
+          </List>
+          <Divider sx={{ margin: "10px 0" }} />
         </Box>
       </Drawer>
     </Box>
