@@ -1,0 +1,14 @@
+/* In your CSS file (e.g., App.css or a separate styles file) */
+.form-control {
+    font-size: 14px;
+    padding: 10px;
+}
+
+button {
+    font-size: 14px;
+    padding: 10px;
+}
+
+.text-center {
+    font-size: 16px;
+}
