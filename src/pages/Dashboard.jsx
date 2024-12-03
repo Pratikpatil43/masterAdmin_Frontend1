@@ -7,6 +7,7 @@ import { Box, Toolbar } from '@mui/material';
 import AddFaculty from '../components/Dashboard/FacultyHandler/addFaculty';
 import Requests from '../components/Dashboard/RequestHandler/Request'
 import FetchFaculty from '../components/Dashboard/FacultyHandler/FetchFaculty';
+import UpdateRequest from '../components/Dashboard/RequestHandler/UpdateRequest'
 
 const Dashboard = () => {
     return (
@@ -30,7 +31,9 @@ const Dashboard = () => {
 
                     <Route path="add-faculty" element={<AddFaculty />} />
                     <Route path="fetch-faculty" element={<FetchFaculty />} />
-                    <Route path="view-requests" element={<Requests />} />
+                    <Route path="track-requests-add-faculty" element={<Requests />} />
+                    <Route path="track-requests-update-faculty" element={<UpdateRequest />} />
+
 
                 </Routes>
             </Box>

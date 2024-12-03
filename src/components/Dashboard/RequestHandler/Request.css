@@ -1,0 +1,7 @@
+.disabled-row {
+    background-color: #f9f9f9; /* Light gray for disabled rows */
+    color: #a0a0a0; /* Dim text color */
+    pointer-events: none; /* Disable click events */
+    opacity: 0.6; /* Reduce opacity */
+  }
+  

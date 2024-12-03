@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import './Request.css'
 
 // Function to decode JWT token
 const decodeJWT = (token) => {
@@ -14,10 +15,12 @@ const decodeJWT = (token) => {
 
 const Request = () => {
   const [requests, setRequests] = useState([]);
+  const [filteredRequests, setFilteredRequests] = useState([]); // To store filtered requests
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadingAction, setLoadingAction] = useState(null); // Track the action loading state
   const [successMessage, setSuccessMessage] = useState('');
+  const [searchQuery, setSearchQuery] = useState(''); // State for the search query
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -38,6 +41,7 @@ const Request = () => {
 
         if (response.data.success) {
           setRequests(response.data.data); // Set the fetched requests
+          setFilteredRequests(response.data.data); // Initialize filtered requests
         } else {
           setError('Failed to fetch requests.');
         }
@@ -51,6 +55,18 @@ const Request = () => {
 
     fetchRequests();
   }, []);
+
+  // Function to filter requests based on search query
+  const handleSearch = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+
+    const filtered = requests.filter((request) =>
+      request.facultyUsername.toLowerCase().includes(query.toLowerCase())
+    );
+
+    setFilteredRequests(filtered);
+  };
 
   const handleAction = async (requestId, action) => {
     try {
@@ -105,6 +121,17 @@ const Request = () => {
     <div className="container mt-5">
       <h1 className="mb-4">Requests</h1>
 
+      {/* Search bar */}
+      <div className="mb-3">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Search by Faculty Username"
+          value={searchQuery}
+          onChange={handleSearch}
+        />
+      </div>
+
       {/* Display success message */}
       {successMessage && (
         <div className="alert alert-success" role="alert">
@@ -112,66 +139,72 @@ const Request = () => {
         </div>
       )}
 
-      {requests.length === 0 ? (
+      {filteredRequests.length === 0 ? (
         <p className="text-center">No requests found.</p>
       ) : (
-        <table className="table table-bordered table-striped">
-          <thead className="thead-dark">
-            <tr>
-              <th>Request ID</th>
-              <th>Name</th>
-              <th>Faculty Username</th>
-              <th>Branch</th>
-              <th>Subject</th>
-              <th>Status</th>
-              <th>Action</th>
-              <th>Created At</th>
-            </tr>
-          </thead>
-          <tbody>
-            {requests.map((request) => (
-              <tr key={request._id}>
-                <td>{request._id}</td>
-                <td>{request.data?.name || 'N/A'}</td>
-                <td>{request.facultyUsername}</td>
-                <td>{request.branch}</td>
-                <td>{request.subject}</td>
-                <td>{request.status}</td>
-                <td>
-                  <div className="btn-group" role="group">
-                    <button
-                      className="btn btn-success btn-sm"
-                      onClick={() => handleAction(request._id, 'approve')}
-                      disabled={loadingAction === request._id} // Disable button while loading
-                    >
-                      {loadingAction === request._id ? (
-                        <div className="spinner-border spinner-border-sm" role="status">
-                          <span className="visually-hidden">Loading...</span>
-                        </div>
-                      ) : (
-                        'Approve'
-                      )}
-                    </button>
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => handleAction(request._id, 'reject')}
-                      disabled={loadingAction === request._id} // Disable button while loading
-                    >
-                      {loadingAction === request._id ? (
-                        <div className="spinner-border spinner-border-sm" role="status">
-                          <span className="visually-hidden">Loading...</span>
-                        </div>
-                      ) : (
-                        'Reject'
-                      )}
-                    </button>
-                  </div>
-                </td>
-                <td>{new Date(request.createdAt).toLocaleString()}</td>
+        <div className="table-responsive">
+          <table className="table table-bordered table-striped">
+            <thead className="thead-dark">
+              <tr>
+                <th>Request ID</th>
+                <th>Name</th>
+                <th>Faculty Username</th>
+                <th>Branch</th>
+                <th>Subject</th>
+                <th>Status</th>
+                <th>Action</th>
+                <th>Created At</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+  {filteredRequests.map((request) => (
+    <tr
+      key={request._id}
+      className={request.status === 'approved' || request.status === 'rejected' ? 'disabled-row' : ''}
+    >
+      <td>{request._id}</td>
+      <td>{request.data?.name || 'N/A'}</td>
+      <td>{request.facultyUsername}</td>
+      <td>{request.branch}</td>
+      <td>{request.subject}</td>
+      <td>{request.status}</td>
+      <td>
+        <div className="btn-group" role="group">
+          <button
+            className="btn btn-success btn-sm"
+            onClick={() => handleAction(request._id, 'approve')}
+            disabled={loadingAction === request._id || request.status === 'approved'} // Disable if approved
+          >
+            {loadingAction === request._id ? (
+              <div className="spinner-border spinner-border-sm" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            ) : (
+              'Approve'
+            )}
+          </button>
+          <button
+            className="btn btn-danger btn-sm"
+            onClick={() => handleAction(request._id, 'reject')}
+            disabled={loadingAction === request._id || request.status === 'rejected'} // Disable if rejected
+          >
+            {loadingAction === request._id ? (
+              <div className="spinner-border spinner-border-sm" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            ) : (
+              'Reject'
+            )}
+          </button>
+        </div>
+      </td>
+      <td>{new Date(request.createdAt).toLocaleString()}</td>
+    </tr>
+  ))}
+</tbody>
+
+          </table>
+        </div>
       )}
     </div>
   );

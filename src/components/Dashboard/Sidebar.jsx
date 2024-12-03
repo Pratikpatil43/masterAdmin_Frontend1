@@ -11,8 +11,18 @@ import {
   useMediaQuery,
   Divider,
   Typography,
+  Button,
+  Menu,
+  MenuItem,
 } from "@mui/material";
-import { Add, List as ListIcon, Menu as MenuIcon } from "@mui/icons-material";
+import {
+  Add,
+  List as ListIcon,
+  Menu as MenuIcon,
+  TrackChanges,
+  AccountCircle,
+  Logout,
+} from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
@@ -20,6 +30,10 @@ const Sidebar = () => {
   const [open, setOpen] = useState(true);
   const isMobile = useMediaQuery("(max-width: 600px)");
   const navigate = useNavigate();
+
+  // State for More Options Dropdown
+  const [anchorEl, setAnchorEl] = useState(null);
+  const isMenuOpen = Boolean(anchorEl);
 
   const toggleDrawer = () => {
     setOpen(!open);
@@ -29,6 +43,19 @@ const Sidebar = () => {
     if (isMobile) {
       setOpen(false);
     }
+  };
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    sessionStorage.clear(); // Clear session storage
+    navigate("/login"); // Redirect to login page
   };
 
   return (
@@ -44,12 +71,10 @@ const Sidebar = () => {
             top: 10,
             left: 10,
             zIndex: 1201,
-            padding: "10px",
-            fontSize: "2rem",
           }}
           onClick={toggleDrawer}
         >
-          <MenuIcon sx={{ fontSize: "2.5rem" }} />
+          <MenuIcon sx={{ fontSize: "2rem" }} />
         </IconButton>
       )}
 
@@ -61,39 +86,35 @@ const Sidebar = () => {
           "& .MuiDrawer-paper": {
             width: drawerWidth,
             boxSizing: "border-box",
-            boxShadow: "2px 0 5px rgba(0, 0, 0, 0.1)", // Subtle shadow effect
-            borderRight: "1px solid #e0e0e0", // Light border for a clean look
+            boxShadow: "2px 0 5px rgba(0, 0, 0, 0.1)",
           },
         }}
         variant={isMobile ? "temporary" : "permanent"}
         anchor="left"
-        open={isMobile ? open : true}
+        open={open}
         onClose={toggleDrawer}
       >
         <Toolbar />
-        <Box sx={{ overflow: "auto", padding: "10px" }}>
+        <Box
+          sx={{
+            overflow: "auto",
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+          }}
+        >
           {/* Section: HOD */}
-          <Typography variant="h6" sx={{ marginBottom: "5px", fontWeight: "bold", color: "#555" }}>
+          <Typography variant="subtitle1" sx={{ padding: "10px", fontWeight: "bold", color: "#555" }}>
             HOD Management
           </Typography>
-          <List>
-            <ListItem
-              button
-              component={Link}
-              to="/dashboard/add-hod"
-              onClick={handleLinkClick}
-            >
+          <List dense>
+            <ListItem button component={Link} to="/dashboard/add-hod" onClick={handleLinkClick}>
               <ListItemIcon>
                 <Add />
               </ListItemIcon>
               <ListItemText primary="Add HOD" />
             </ListItem>
-            <ListItem
-              button
-              component={Link}
-              to="/dashboard/fetch-hod"
-              onClick={handleLinkClick}
-            >
+            <ListItem button component={Link} to="/dashboard/fetch-hod" onClick={handleLinkClick}>
               <ListItemIcon>
                 <ListIcon />
               </ListItemIcon>
@@ -103,27 +124,17 @@ const Sidebar = () => {
           <Divider sx={{ margin: "10px 0" }} />
 
           {/* Section: Faculty */}
-          <Typography variant="h6" sx={{ marginBottom: "5px", fontWeight: "bold", color: "#555" }}>
+          <Typography variant="subtitle1" sx={{ padding: "10px", fontWeight: "bold", color: "#555" }}>
             Faculty Management
           </Typography>
-          <List>
-            <ListItem
-              button
-              component={Link}
-              to="/dashboard/add-faculty"
-              onClick={handleLinkClick}
-            >
+          <List dense>
+            <ListItem button component={Link} to="/dashboard/add-faculty" onClick={handleLinkClick}>
               <ListItemIcon>
                 <Add />
               </ListItemIcon>
               <ListItemText primary="Add Faculty" />
             </ListItem>
-            <ListItem
-              button
-              component={Link}
-              to="/dashboard/fetch-faculty"
-              onClick={handleLinkClick}
-            >
+            <ListItem button component={Link} to="/dashboard/fetch-faculty" onClick={handleLinkClick}>
               <ListItemIcon>
                 <ListIcon />
               </ListItemIcon>
@@ -133,23 +144,63 @@ const Sidebar = () => {
           <Divider sx={{ margin: "10px 0" }} />
 
           {/* Section: Requests */}
-          <Typography variant="h6" sx={{ marginBottom: "5px", fontWeight: "bold", color: "#555" }}>
+          <Typography variant="subtitle1" sx={{ padding: "10px", fontWeight: "bold", color: "#555" }}>
             Requests Management
           </Typography>
-          <List>
+          <List dense>
             <ListItem
               button
               component={Link}
-              to="/dashboard/view-requests" // Link to the page for viewing requests
+              to="/dashboard/track-requests-add-faculty"
               onClick={handleLinkClick}
             >
               <ListItemIcon>
-                <ListIcon />
+                <TrackChanges />
               </ListItemIcon>
-              <ListItemText primary="View Requests" />
+              <ListItemText primary="Track Requests: Add Faculty" />
+            </ListItem>
+            <ListItem
+              button
+              component={Link}
+              to="/dashboard/track-requests-update-faculty"
+              onClick={handleLinkClick}
+            >
+              <ListItemIcon>
+                <TrackChanges />
+              </ListItemIcon>
+              <ListItemText primary="Track Requests: Update Faculty" />
             </ListItem>
           </List>
-          <Divider sx={{ margin: "10px 0" }} />
+        </Box>
+
+        {/* More Options Section */}
+        <Divider />
+        <Box sx={{ padding: "10px" }}>
+          <Button
+            fullWidth
+            variant="contained"
+            sx={{ backgroundColor: "#1976d2", color: "#fff" }}
+            startIcon={<AccountCircle />}
+            onClick={handleMenuOpen}
+          >
+            More Options
+          </Button>
+          <Menu anchorEl={anchorEl} open={isMenuOpen} onClose={handleMenuClose}>
+            <MenuItem onClick={() => navigate("/profile")}>My Profile</MenuItem>
+          </Menu>
+        </Box>
+
+        {/* Logout Button */}
+        <Box sx={{ padding: "10px", marginTop: "auto" }}>
+          <Button
+            fullWidth
+            variant="contained"
+            color="error"
+            startIcon={<Logout />}
+            onClick={handleLogout}
+          >
+            Logout
+          </Button>
         </Box>
       </Drawer>
     </Box>
