@@ -56,7 +56,12 @@ const FetchHod = () => {
           throw new Error("Invalid HODs data format");
         }
       } catch (err) {
-        setError("Failed to fetch HODs: " + err.message);
+        // Specifically handle 404 errors for "no data found"
+        if (err.response && err.response.status === 404) {
+          setError("No HODs found.");
+        } else {
+          setError("Failed to fetch HODs: " + err.message);
+        }
       }
     };
 
@@ -259,7 +264,6 @@ const FetchHod = () => {
               <Form.Label>Name</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="Enter name"
                 name="name"
                 value={formData.name}
                 onChange={handleFormChange}
@@ -269,18 +273,17 @@ const FetchHod = () => {
               <Form.Label>Username</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="Enter username"
                 name="username"
                 value={formData.username}
                 onChange={handleFormChange}
               />
             </Form.Group>
             <Form.Group controlId="formPassword">
-              <Form.Label>Password</Form.Label>
+              <Form.Label>New Password</Form.Label>
               <Form.Control
                 type="password"
-                placeholder="Enter password"
                 name="password"
+                placeholder="Enter new password"
                 value={formData.password}
                 onChange={handleFormChange}
               />
@@ -289,7 +292,6 @@ const FetchHod = () => {
               <Form.Label>Branch</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="Enter branch"
                 name="branch"
                 value={formData.branch}
                 onChange={handleFormChange}
