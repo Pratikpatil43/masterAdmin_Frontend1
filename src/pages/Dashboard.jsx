@@ -9,6 +9,7 @@ import Requests from '../components/Dashboard/RequestHandler/Request'
 import FetchFaculty from '../components/Dashboard/FacultyHandler/FetchFaculty';
 import UpdateRequest from '../components/Dashboard/RequestHandler/UpdateRequest'
 
+
 const Dashboard = () => {
     return (
         <Box sx={{ display: 'flex' }}>
@@ -33,6 +34,7 @@ const Dashboard = () => {
                     <Route path="fetch-faculty" element={<FetchFaculty />} />
                     <Route path="track-requests-add-faculty" element={<Requests />} />
                     <Route path="track-requests-update-faculty" element={<UpdateRequest />} />
+                
 
 
                 </Routes>

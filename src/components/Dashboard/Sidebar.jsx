@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Drawer,
   List,
@@ -22,18 +22,25 @@ import {
   TrackChanges,
   AccountCircle,
   Logout,
+  Login,
 } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
   const drawerWidth = 240;
   const [open, setOpen] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const isMobile = useMediaQuery("(max-width: 600px)");
   const navigate = useNavigate();
 
-  // State for More Options Dropdown
   const [anchorEl, setAnchorEl] = useState(null);
   const isMenuOpen = Boolean(anchorEl);
+
+  useEffect(() => {
+    // Check if the user is logged in by validating the presence of a token
+    const token = sessionStorage.getItem("token");
+    setIsLoggedIn(!!token);
+  }, []);
 
   const toggleDrawer = () => {
     setOpen(!open);
@@ -55,6 +62,11 @@ const Sidebar = () => {
 
   const handleLogout = () => {
     sessionStorage.clear(); // Clear session storage
+    setIsLoggedIn(false); // Update state to reflect logged-out status
+    navigate("/login"); // Redirect to login page
+  };
+
+  const handleLogin = () => {
     navigate("/login"); // Redirect to login page
   };
 
@@ -104,17 +116,30 @@ const Sidebar = () => {
           }}
         >
           {/* Section: HOD */}
-          <Typography variant="subtitle1" sx={{ padding: "10px", fontWeight: "bold", color: "#555" }}>
+          <Typography
+            variant="subtitle1"
+            sx={{ padding: "10px", fontWeight: "bold", color: "#555" }}
+          >
             HOD Management
           </Typography>
           <List dense>
-            <ListItem button component={Link} to="/dashboard/add-hod" onClick={handleLinkClick}>
+            <ListItem
+              button
+              component={Link}
+              to="/dashboard/add-hod"
+              onClick={handleLinkClick}
+            >
               <ListItemIcon>
                 <Add />
               </ListItemIcon>
               <ListItemText primary="Add HOD" />
             </ListItem>
-            <ListItem button component={Link} to="/dashboard/fetch-hod" onClick={handleLinkClick}>
+            <ListItem
+              button
+              component={Link}
+              to="/dashboard/fetch-hod"
+              onClick={handleLinkClick}
+            >
               <ListItemIcon>
                 <ListIcon />
               </ListItemIcon>
@@ -124,17 +149,30 @@ const Sidebar = () => {
           <Divider sx={{ margin: "10px 0" }} />
 
           {/* Section: Faculty */}
-          <Typography variant="subtitle1" sx={{ padding: "10px", fontWeight: "bold", color: "#555" }}>
+          <Typography
+            variant="subtitle1"
+            sx={{ padding: "10px", fontWeight: "bold", color: "#555" }}
+          >
             Faculty Management
           </Typography>
           <List dense>
-            <ListItem button component={Link} to="/dashboard/add-faculty" onClick={handleLinkClick}>
+            <ListItem
+              button
+              component={Link}
+              to="/dashboard/add-faculty"
+              onClick={handleLinkClick}
+            >
               <ListItemIcon>
                 <Add />
               </ListItemIcon>
               <ListItemText primary="Add Faculty" />
             </ListItem>
-            <ListItem button component={Link} to="/dashboard/fetch-faculty" onClick={handleLinkClick}>
+            <ListItem
+              button
+              component={Link}
+              to="/dashboard/fetch-faculty"
+              onClick={handleLinkClick}
+            >
               <ListItemIcon>
                 <ListIcon />
               </ListItemIcon>
@@ -144,7 +182,10 @@ const Sidebar = () => {
           <Divider sx={{ margin: "10px 0" }} />
 
           {/* Section: Requests */}
-          <Typography variant="subtitle1" sx={{ padding: "10px", fontWeight: "bold", color: "#555" }}>
+          <Typography
+            variant="subtitle1"
+            sx={{ padding: "10px", fontWeight: "bold", color: "#555" }}
+          >
             Requests Management
           </Typography>
           <List dense>
@@ -190,17 +231,29 @@ const Sidebar = () => {
           </Menu>
         </Box>
 
-        {/* Logout Button */}
+        {/* Conditional Logout/Login Button */}
         <Box sx={{ padding: "10px", marginTop: "auto" }}>
-          <Button
-            fullWidth
-            variant="contained"
-            color="error"
-            startIcon={<Logout />}
-            onClick={handleLogout}
-          >
-            Logout
-          </Button>
+          {isLoggedIn ? (
+            <Button
+              fullWidth
+              variant="contained"
+              color="error"
+              startIcon={<Logout />}
+              onClick={handleLogout}
+            >
+              Logout
+            </Button>
+          ) : (
+            <Button
+              fullWidth
+              variant="contained"
+              color="primary"
+              startIcon={<Login />}
+              onClick={handleLogin}
+            >
+              Login
+            </Button>
+          )}
         </Box>
       </Drawer>
     </Box>

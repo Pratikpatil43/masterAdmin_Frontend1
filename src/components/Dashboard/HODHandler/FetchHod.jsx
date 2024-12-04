@@ -35,7 +35,7 @@ const FetchHod = () => {
       try {
         const token = sessionStorage.getItem("token");
         if (!token) {
-          throw new Error("No authentication token found.");
+          throw new Error("Please Login to make operations");
         }
 
         // Decode the JWT token using the custom decodeJWT function
