@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Container, Row, Col, Table, Button, Modal, Form, Alert, Spinner } from "react-bootstrap";
+import { Container, Row, Col, Button, Modal, Form, Alert, Spinner, Card } from "react-bootstrap";
 import { BsPencil, BsTrash } from "react-icons/bs";
 
 // Manually decode JWT
@@ -144,37 +144,30 @@ const FetchFaculty = () => {
         </div>
       )}
 
-      {/* Display faculty list in a table */}
+      {/* Display faculty list in cards */}
       {!loading && faculty.length > 0 && (
-        <Table striped bordered hover className="mt-3">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Username</th>
-              <th>Branch</th>
-              <th>Subject</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {faculty.map((faculty) => (
-              <tr key={faculty.id}>
-                <td>{faculty.name}</td>
-                <td>{faculty.username}</td>
-                <td>{faculty.branch}</td>
-                <td>{faculty.subject}</td>
-                <td>
+        <Row className="mt-3">
+          {faculty.map((faculty) => (
+            <Col sm={12} md={6} lg={4} key={faculty.id} className="mb-3">
+              <Card>
+                <Card.Body>
+                  <Card.Title>{faculty.name}</Card.Title>
+                  <Card.Subtitle className="mb-2 text-muted">{faculty.branch}</Card.Subtitle>
+                  <Card.Text>
+                    <strong>Username:</strong> {faculty.username}<br />
+                    <strong>Subject:</strong> {faculty.subject}
+                  </Card.Text>
                   <Button variant="warning" className="me-2" onClick={() => handleUpdate(faculty)}>
                     <BsPencil /> Update
                   </Button>
                   <Button variant="danger" onClick={() => { setSelectedFaculty(faculty); setShowDeleteModal(true); }}>
                     <BsTrash /> Delete
                   </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))}
+        </Row>
       )}
 
       {/* Modal for updating faculty */}

@@ -24,54 +24,53 @@ const AuthForm = ({ type, onSubmit }) => {
     // Handle form submission for register
     const handleSubmit = async (e) => {
         e.preventDefault();  // Prevent form from reloading page
-      
+
         const payload = {
-          username,
-          password,
-          name,  // Include name in the payload (only for register)
-          role: 'masterAdmin',  // Default role set to 'masterAdmin'
+            username,
+            password,
+            name,  // Include name in the payload (only for register)
+            role: 'masterAdmin',  // Default role set to 'masterAdmin'
         };
-      
+
         const url = type === 'login'
-          ? 'http://localhost:5000/api/masterAdmin/login'
-          : 'http://localhost:5000/api/masterAdmin/register'; // Ensure this is for registration
-      
+            ? 'http://localhost:5000/api/masterAdmin/login'
+            : 'http://localhost:5000/api/masterAdmin/register'; // Ensure this is for registration
+
         try {
-          const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(payload),
-          });
-      
-          const result = await response.json();
-      
-          if (response.status === 201 || response.status === 200) {
-            // Success, handle successful registration/login
-            alert(result.message);
-            
-            if (type === 'login') {
-              // Set token in session storage for 4 hours
-              const expirationTime = new Date().getTime() + 4 * 60 * 60 * 1000; // 4 hours from now
-              sessionStorage.setItem('token', result.token);
-              sessionStorage.setItem('tokenExpiration', expirationTime);
-      
-              // Redirect to dashboard after login
-              navigate('/dashboard');
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            const result = await response.json();
+
+            if (response.status === 201 || response.status === 200) {
+                // Success, handle successful registration/login
+                alert(result.message);
+
+                if (type === 'login') {
+                    // Set token in session storage for 4 hours
+                    const expirationTime = new Date().getTime() + 4 * 60 * 60 * 1000; // 4 hours from now
+                    sessionStorage.setItem('token', result.token);
+                    sessionStorage.setItem('tokenExpiration', expirationTime);
+
+                    // Redirect to dashboard after login
+                    navigate('/dashboard');
+                } else {
+                    navigate('/login');  // Redirect to login page after successful registration
+                }
             } else {
-              navigate('/login');  // Redirect to login page after successful registration
+                // Handle errors
+                alert(result.message || 'Error during authentication');
             }
-          } else {
-            // Handle errors
-            alert(result.message || 'Error during authentication');
-          }
         } catch (error) {
-          console.error('Error:', error);
-          alert('An error occurred while processing your request');
+            console.error('Error:', error);
+            alert('An error occurred while processing your request');
         }
-      };
-      
+    };
 
     return (
         <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh', background: '#f4f4f4' }}>
@@ -153,25 +152,13 @@ const AuthForm = ({ type, onSubmit }) => {
                         />
                     </Form.Group>
 
-                    {/* Role Selector (Register Only) */}
-                    {type === 'register' && (
-                        <Form.Group className="mb-3" controlId="formBasicRole">
-                            <Form.Label style={{ fontWeight: '600', fontSize: '16px' }}>Role</Form.Label>
-                            <Form.Control
-                                as="select"
-                                value={role}
-                                disabled
-                                size="sm"
-                                style={{
-                                    fontSize: '14px',
-                                    padding: '12px',
-                                    borderRadius: '8px',
-                                    border: '1px solid #ddd'
-                                }}
-                            >
-                                <option value="masterAdmin">masterAdmin</option>
-                            </Form.Control>
-                        </Form.Group>
+                    {/* Forgot Password Link (Login Only) */}
+                    {type === 'login' && (
+                        <div className="mb-3 text-center">
+                            <RouterLink to="/forgot-password" style={{ fontSize: '14px', color: '#4c56cc', textDecoration: 'none' }}>
+                                Forgot Password?
+                            </RouterLink>
+                        </div>
                     )}
 
                     {/* Submit Button */}
