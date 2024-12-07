@@ -33,7 +33,7 @@ const Request = () => {
           return;
         }
 
-        const response = await axios.get('http://localhost:5000/api/masterAdmin/getRequests', {
+        const response = await axios.get('/api/masterAdmin/getRequests', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -83,7 +83,7 @@ const Request = () => {
       }
   
       const response = await axios.post(
-        `http://localhost:5000/api/masterAdmin/approveRejectRequest`,
+        `/api/masterAdmin/approveRejectRequest`,
         { requestId, action },
         {
           headers: {

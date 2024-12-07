@@ -23,7 +23,7 @@ const UpdateRequest = () => {
         }
 
         const response = await axios.get(
-          "http://localhost:5000/api/masterAdmin/getupdateRequests",
+          "/api/masterAdmin/getupdateRequests",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -73,8 +73,8 @@ const UpdateRequest = () => {
 
       const endpoint =
         type === "remove"
-          ? "http://localhost:5000/api/masterAdmin/removeRequest"
-          : "http://localhost:5000/api/masterAdmin/updateRequest";
+          ? "/api/masterAdmin/removeRequest"
+          : "/api/masterAdmin/updateRequest";
 
       const response = await axios.post(
         endpoint,

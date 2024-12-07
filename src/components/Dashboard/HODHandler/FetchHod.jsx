@@ -46,7 +46,7 @@ const FetchHod = () => {
 
         // Fetch HODs using the retrieved masterAdminId
         const hodsResponse = await axios.get(
-          `http://localhost:5000/api/masterAdmin/hod/getHod/${decodedToken.masterAdmin}`,
+          `/api/masterAdmin/hod/getHod/${decodedToken.masterAdmin}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -91,7 +91,7 @@ const FetchHod = () => {
       }
 
       // Delete HOD using the id and token for authentication
-      await axios.delete(`http://localhost:5000/api/masterAdmin/hod/remove/${hodToDelete._id}`, {
+      await axios.delete(`/api/masterAdmin/hod/remove/${hodToDelete._id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -150,7 +150,7 @@ const FetchHod = () => {
 
       // Update HOD using the id and token for authentication
       const response = await axios.put(
-        `http://localhost:5000/api/masterAdmin/hod/update/${currentHod._id}`,
+        `/api/masterAdmin/hod/update/${currentHod._id}`,
         updatedData,
         {
           headers: {

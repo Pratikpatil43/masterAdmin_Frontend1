@@ -13,7 +13,7 @@ const ForgotPassword = () => {
         setLoading(true); // Show loader
 
         try {
-            const response = await axios.put('http://localhost:5000/api/masterAdmin/forgetPassword', {
+            const response = await axios.put('/api/masterAdmin/forgetPassword', {
                 username,
                 newPassword,
             });

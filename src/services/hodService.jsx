@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // The backend API URL for adding HOD
-const apiUrl = "http://localhost:5000/api/masterAdmin/hod/add";  
+const apiUrl = "/api/masterAdmin/hod/add";  
 
 // Function to decode JWT token
 const decodeJWT = (token) => {

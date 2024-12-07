@@ -4,7 +4,7 @@ import Sidebar from '../components/Dashboard/Sidebar';
 import AddHodForm from '../components/Dashboard/HODHandler/AddHodForm'; // Add HOD form component
 import FetchHod from '../components/Dashboard/HODHandler/FetchHod'; // Fetch HOD component
 import { Box, Toolbar } from '@mui/material';
-import AddFaculty from '../components/Dashboard/FacultyHandler/addFaculty';
+import AddFaculty from '../components/Dashboard/FacultyHandler/AddFaculty';
 import Requests from '../components/Dashboard/RequestHandler/Request'
 import FetchFaculty from '../components/Dashboard/FacultyHandler/FetchFaculty';
 import UpdateRequest from '../components/Dashboard/RequestHandler/UpdateRequest'

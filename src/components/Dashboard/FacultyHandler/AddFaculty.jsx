@@ -41,7 +41,7 @@ const AddFaculty = () => {
 
       // Send data to backend API with the headers and the form data in the body
       const response = await axios.post(
-        "http://localhost:5000/api/masterAdmin/faculty/add", // Correct route
+        "/api/masterAdmin/faculty/add", // Correct route
         formData, // Pass form data here
         {
           headers: {

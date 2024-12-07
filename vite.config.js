@@ -17,7 +17,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:5000', // Proxy API requests to your backend
+        target: 'https://attendancetracker-backend1.onrender.com', // Proxy API requests to your backend
         changeOrigin: true, // Adjust origin header for requests
         secure: false, // Accept self-signed certificates during development
       },

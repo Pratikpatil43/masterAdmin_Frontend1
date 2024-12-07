@@ -29,8 +29,8 @@ const AuthForm = ({ type, onSubmit }) => {
         };
 
         const url = type === 'login'
-            ? 'http://localhost:5000/api/masterAdmin/login'
-            : 'http://localhost:5000/api/masterAdmin/register';
+            ? '/api/masterAdmin/login'
+            : '/api/masterAdmin/register';
 
         try {
             const response = await fetch(url, {
