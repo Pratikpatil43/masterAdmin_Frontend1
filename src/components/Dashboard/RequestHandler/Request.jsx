@@ -33,7 +33,7 @@ const Request = () => {
           return;
         }
 
-        const response = await axios.get('/api/masterAdmin/getRequests', {
+        const response = await axios.get('https://attendancetracker-backend1.onrender.com/api/masterAdmin/getRequests', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -83,7 +83,7 @@ const Request = () => {
       }
   
       const response = await axios.post(
-        `/api/masterAdmin/approveRejectRequest`,
+        `https://attendancetracker-backend1.onrender.com/api/masterAdmin/approveRejectRequest`,
         { requestId, action },
         {
           headers: {

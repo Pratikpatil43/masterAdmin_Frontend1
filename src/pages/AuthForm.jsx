@@ -29,8 +29,8 @@ const AuthForm = ({ type, onSubmit }) => {
         };
 
         const url = type === 'login'
-            ? '/api/masterAdmin/login'
-            : '/api/masterAdmin/register';
+            ? 'https://attendancetracker-backend1.onrender.com/api/masterAdmin/login'
+            : 'https://attendancetracker-backend1.onrender.com/api/masterAdmin/register';
 
         try {
             const response = await fetch(url, {

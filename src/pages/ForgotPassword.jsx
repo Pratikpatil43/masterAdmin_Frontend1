@@ -13,7 +13,7 @@ const ForgotPassword = () => {
         setLoading(true); // Show loader
 
         try {
-            const response = await axios.put('/api/masterAdmin/forgetPassword', {
+            const response = await axios.put('https://attendancetracker-backend1.onrender.com/api/masterAdmin/forgetPassword', {
                 username,
                 newPassword,
             });

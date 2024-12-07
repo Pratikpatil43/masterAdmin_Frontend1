@@ -41,7 +41,7 @@ const FetchFaculty = () => {
         throw new Error("Invalid token: masterAdminId missing.");
       }
 
-      const response = await axios.get(`/api/masterAdmin/faculty/getFaculty/${decodedToken.masterAdmin}`, {
+      const response = await axios.get(`https://attendancetracker-backend1.onrender.com/api/masterAdmin/faculty/getFaculty/${decodedToken.masterAdmin}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -67,7 +67,7 @@ const FetchFaculty = () => {
       }
   
       // Send the delete request
-      const response = await axios.delete(`/api/masterAdmin/faculty/remove/${id}`, {
+      const response = await axios.delete(`https://attendancetracker-backend1.onrender.com/api/masterAdmin/faculty/remove/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
   
@@ -104,7 +104,7 @@ const FetchFaculty = () => {
     }
 
     try {
-      const response = await axios.put(`/api/masterAdmin/faculty/update/${selectedFaculty.id}`, formData, {
+      const response = await axios.put(`https://attendancetracker-backend1.onrender.com/api/masterAdmin/faculty/update/${selectedFaculty.id}`, formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setMessage(response.data.message);

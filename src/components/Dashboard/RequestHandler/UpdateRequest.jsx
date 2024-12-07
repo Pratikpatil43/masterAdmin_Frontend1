@@ -23,7 +23,7 @@ const UpdateRequest = () => {
         }
 
         const response = await axios.get(
-          "/api/masterAdmin/getupdateRequests",
+          "https://attendancetracker-backend1.onrender.com/api/masterAdmin/getupdateRequests",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -73,8 +73,8 @@ const UpdateRequest = () => {
 
       const endpoint =
         type === "remove"
-          ? "/api/masterAdmin/removeRequest"
-          : "/api/masterAdmin/updateRequest";
+          ? "https://attendancetracker-backend1.onrender.com/api/masterAdmin/removeRequest"
+          : "https://attendancetracker-backend1.onrender.com/api/masterAdmin/updateRequest";
 
       const response = await axios.post(
         endpoint,

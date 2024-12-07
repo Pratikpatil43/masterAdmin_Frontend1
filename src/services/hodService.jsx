@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // The backend API URL for adding HOD
-const apiUrl = "/api/masterAdmin/hod/add";  
+const apiUrl = "https://attendancetracker-backend1.onrender.com/api/masterAdmin/hod/add";  
 
 // Function to decode JWT token
 const decodeJWT = (token) => {

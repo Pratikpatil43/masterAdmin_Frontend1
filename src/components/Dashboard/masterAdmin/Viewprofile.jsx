@@ -13,7 +13,7 @@ const ViewProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get("/api/masteradmin/profile", {
+        const response = await axios.get("https://attendancetracker-backend1.onrender.com/api/masteradmin/profile", {
           headers: {
             Authorization: `Bearer ${sessionStorage.getItem("token")}`,
             
