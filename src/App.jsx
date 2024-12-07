@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AuthForm from './pages/AuthForm';
 import Dashboard from './pages/Dashboard';
 import ForgotPassword from './pages/ForgotPassword';
-import Viewprofile from './components/Dashboard/masterAdmin/viewProfile';
+import Viewprofile from './components/Dashboard/masterAdmin/Viewprofile';
 
 const App = () => {
     return (
