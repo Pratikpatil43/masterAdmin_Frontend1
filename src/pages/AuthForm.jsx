@@ -5,36 +5,32 @@ import { Link as RouterLink, useNavigate } from 'react-router-dom';
 const AuthForm = ({ type, onSubmit }) => {
     const [password, setPassword] = useState('');
     const [username, setUsername] = useState('');
-    const [name, setName] = useState(''); // New state for the name
-    const [role] = useState('masterAdmin');  // Default role set to 'masterAdmin'
-    const navigate = useNavigate();  // Use useNavigate instead of useHistory
+    const [name, setName] = useState('');
+    const [role] = useState('masterAdmin');
+    const [message, setMessage] = useState({ text: '', type: '' }); // State for message
+    const navigate = useNavigate();
 
-    // Determine password visibility based on form type
-    const passwordType = type === 'login' ? 'password' : 'text';  // 'password' for login, 'text' for register
+    const passwordType = type === 'login' ? 'password' : 'text';
 
-    // Check if token is set in sessionStorage on component mount
     useEffect(() => {
         const token = sessionStorage.getItem('token');
         if (token) {
-            // If token is set, redirect to dashboard
             navigate('/dashboard');
         }
     }, [navigate]);
 
-    // Handle form submission for register
     const handleSubmit = async (e) => {
-        e.preventDefault();  // Prevent form from reloading page
-
+        e.preventDefault();
         const payload = {
             username,
             password,
-            name,  // Include name in the payload (only for register)
-            role: 'masterAdmin',  // Default role set to 'masterAdmin'
+            name,
+            role,
         };
 
         const url = type === 'login'
             ? 'http://localhost:5000/api/masterAdmin/login'
-            : 'http://localhost:5000/api/masterAdmin/register'; // Ensure this is for registration
+            : 'http://localhost:5000/api/masterAdmin/register';
 
         try {
             const response = await fetch(url, {
@@ -48,34 +44,32 @@ const AuthForm = ({ type, onSubmit }) => {
             const result = await response.json();
 
             if (response.status === 201 || response.status === 200) {
-                // Success, handle successful registration/login
-                alert(result.message);
-
-                if (type === 'login') {
-                    // Set token in session storage for 4 hours
-                    const expirationTime = new Date().getTime() + 4 * 60 * 60 * 1000; // 4 hours from now
-                    sessionStorage.setItem('token', result.token);
-                    sessionStorage.setItem('tokenExpiration', expirationTime);
-
-                    // Redirect to dashboard after login
-                    navigate('/dashboard');
-                } else {
-                    navigate('/login');  // Redirect to login page after successful registration
-                }
+                setMessage({ text: result.message, type: 'success' }); // Set success message
+                setTimeout(() => {
+                    setMessage({ text: '', type: '' }); // Clear message after 3 seconds
+                    if (type === 'login') {
+                        const expirationTime = new Date().getTime() + 4 * 60 * 60 * 1000;
+                        sessionStorage.setItem('token', result.token);
+                        sessionStorage.setItem('tokenExpiration', expirationTime);
+                        navigate('/dashboard');
+                    } else {
+                        navigate('/login');
+                    }
+                }, 3000);
             } else {
-                // Handle errors
-                alert(result.message || 'Error during authentication');
+                setMessage({ text: result.message || 'Error during authentication', type: 'error' });
+                setTimeout(() => setMessage({ text: '', type: '' }), 3000);
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('An error occurred while processing your request');
+            setMessage({ text: 'An error occurred while processing your request', type: 'error' });
+            setTimeout(() => setMessage({ text: '', type: '' }), 3000);
         }
     };
 
     return (
         <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh', background: '#f4f4f4' }}>
             <div style={{ maxWidth: '450px', width: '100%' }}>
-                {/* Title Outside the Box */}
                 <h3 className="text-center mb-4" style={{
                     fontFamily: 'Roboto, sans-serif',
                     fontWeight: '700',
@@ -86,6 +80,19 @@ const AuthForm = ({ type, onSubmit }) => {
                     {type === 'login' ? 'Principal Admin Login' : 'Principal Admin Register'}
                 </h3>
 
+                {/* Display Message */}
+                {message.text && (
+                    <div style={{
+                        color: message.type === 'success' ? 'green' : 'red',
+                        textAlign: 'center',
+                        marginBottom: '20px',
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                    }}>
+                        {message.text}
+                    </div>
+                )}
+
                 <Form onSubmit={handleSubmit} className="p-4 shadow-lg" style={{
                     backgroundColor: 'white',
                     borderRadius: '12px',
@@ -93,7 +100,6 @@ const AuthForm = ({ type, onSubmit }) => {
                     boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)',
                     transition: 'transform 0.3s ease',
                 }}>
-                    {/* Name Field (Only for Register) */}
                     {type === 'register' && (
                         <Form.Group className="mb-3" controlId="formBasicName">
                             <Form.Label style={{ fontWeight: '600', fontSize: '16px' }}>Name</Form.Label>
@@ -113,8 +119,6 @@ const AuthForm = ({ type, onSubmit }) => {
                             />
                         </Form.Group>
                     )}
-
-                    {/* Username Field */}
                     <Form.Group className="mb-3" controlId="formBasicUsername">
                         <Form.Label style={{ fontWeight: '600', fontSize: '16px' }}>Username</Form.Label>
                         <Form.Control
@@ -132,12 +136,10 @@ const AuthForm = ({ type, onSubmit }) => {
                             }}
                         />
                     </Form.Group>
-
-                    {/* Password Field */}
                     <Form.Group className="mb-3" controlId="formBasicPassword">
                         <Form.Label style={{ fontWeight: '600', fontSize: '16px' }}>Password</Form.Label>
                         <Form.Control
-                            type={passwordType}  // Dynamically change type
+                            type={passwordType}
                             placeholder="Enter password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -151,8 +153,6 @@ const AuthForm = ({ type, onSubmit }) => {
                             }}
                         />
                     </Form.Group>
-
-                    {/* Forgot Password Link (Login Only) */}
                     {type === 'login' && (
                         <div className="mb-3 text-center">
                             <RouterLink to="/forgot-password" style={{ fontSize: '14px', color: '#4c56cc', textDecoration: 'none' }}>
@@ -160,8 +160,6 @@ const AuthForm = ({ type, onSubmit }) => {
                             </RouterLink>
                         </div>
                     )}
-
-                    {/* Submit Button */}
                     <Button
                         variant="primary"
                         type="submit"
@@ -179,8 +177,6 @@ const AuthForm = ({ type, onSubmit }) => {
                         {type === 'login' ? 'Login' : 'Register'}
                     </Button>
                 </Form>
-
-                {/* Link to the other page */}
                 {type === 'login' ? (
                     <p className="mt-3 text-center">
                         Don't have an account? <RouterLink to="/register">Register</RouterLink>
